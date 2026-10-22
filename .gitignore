@@ -1,0 +1,28 @@
+# IDE
+.vscode
+.idea
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Dependency directories
+node_modules/
+
+# Coverage
+coverage
+*.lcov
+
+# dotenv environment variable files
+.env
+.env.development.local
+.env.test.local
+.env.production.local
+.env.local
+
+# Build / cache
+dist
+.cache
+
+uploads/*

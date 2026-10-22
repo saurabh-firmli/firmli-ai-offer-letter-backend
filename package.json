@@ -1,0 +1,37 @@
+{
+  "name": "firmli-ai-offer-letter-backend",
+  "version": "1.0.0.0001",
+  "description": "Firmli AI Offer Letter - Backend",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "node --import ./test/setup.js --test --test-reporter=spec \"test/**/*.test.js\"",
+    "staging": "dotenvx run --env-file=.env.development.local -- nodemon ./bin/www",
+    "production": "dotenvx run --env-file=.env -- node ./bin/www",
+    "production_start": "node ./bin/www"
+  },
+  "keywords": [
+    "Firmli",
+    "AI",
+    "Offer Letter",
+    "Backend"
+  ],
+  "author": "Team Firmli",
+  "private": true,
+  "dependencies": {
+    "@dotenvx/dotenvx": "^1.60.2",
+    "cors": "^2.8.5",
+    "express": "^4.22.1",
+    "helmet": "^8.3.0",
+    "joi": "^17.12.2",
+    "mysql2": "^3.9.2",
+    "pino": "^10.4.0",
+    "pino-http": "^11.0.0",
+    "sequelize": "^6.37.8"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14",
+    "pino-pretty": "^13.2.0",
+    "supertest": "^7.3.1"
+  }
+}

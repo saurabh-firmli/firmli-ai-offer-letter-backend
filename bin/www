@@ -1,0 +1,41 @@
+#!/usr/bin/env node
+
+import config from "../src/v1/configs/env.config.js";
+import logger from "../src/v1/utils/logger.util.js";
+import firmliOfferLetterApp from "../src/v1/firmliOfferLetterApp.js";
+import {initDatabase, closeDatabase} from "../src/v1/utils/database.util.js";
+
+if (config.db.enabled) {
+  await initDatabase();
+}
+
+const server = firmliOfferLetterApp.listen(config.port, () => {
+  logger.info(`Listening on port ${config.port}`);
+});
+
+let isShuttingDown = false;
+const shutdown = (signal, exitCode = 0) => {
+  if (isShuttingDown) return;
+  isShuttingDown = true;
+  logger.info({signal}, "Shutting down...");
+
+  server.close(async () => {
+    await closeDatabase();
+    process.exit(exitCode);
+  });
+  // Open connections can keep close() waiting: force exit after 10s
+  setTimeout(() => process.exit(1), 10000).unref();
+};
+
+process.on("SIGINT", () => shutdown("SIGINT"));
+process.on("SIGTERM", () => shutdown("SIGTERM"));
+
+// The process is in an unknown state after these: log, shut down, and let the orchestrator restart it
+process.on("unhandledRejection", (err) => {
+  logger.fatal({err}, "Unhandled promise rejection");
+  shutdown("unhandledRejection", 1);
+});
+process.on("uncaughtException", (err) => {
+  logger.fatal({err}, "Uncaught exception");
+  shutdown("uncaughtException", 1);
+});
