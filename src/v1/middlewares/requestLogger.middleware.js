@@ -2,6 +2,9 @@ import {randomUUID} from "node:crypto";
 import pinoHttp from "pino-http";
 import logger from "../utils/logger.util.js";
 
+// An events ticket rides in the URL (EventSource cannot send headers): keep it out of the logs
+const maskTicket = (url) => url.replace(/([?&]ticket=)[^&]*/, "$1***");
+
 // Logs one line per request and gives it an id: req.id, the X-Request-Id header, and req.log
 const requestLogger = pinoHttp({
     logger,
@@ -16,11 +19,11 @@ const requestLogger = pinoHttp({
         return "info";
     },
     customSuccessMessage: (req, res, responseTime) =>
-        `${req.method} ${req.originalUrl} ${res.statusCode} ${Math.round(responseTime)}ms`,
+        `${req.method} ${maskTicket(req.originalUrl)} ${res.statusCode} ${Math.round(responseTime)}ms`,
     customErrorMessage: (req, res, err) =>
-        `${req.method} ${req.originalUrl} ${res.statusCode} ${err.message}`,
+        `${req.method} ${maskTicket(req.originalUrl)} ${res.statusCode} ${err.message}`,
     serializers: {
-        req: (req) => ({id: req.id, method: req.method, url: req.url}),
+        req: (req) => ({id: req.id, method: req.method, url: maskTicket(req.url)}),
         res: (res) => ({statusCode: res.statusCode}),
     },
 });

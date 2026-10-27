@@ -4,9 +4,14 @@ import config from "../src/v1/configs/env.config.js";
 import logger from "../src/v1/utils/logger.util.js";
 import firmliOfferLetterApp from "../src/v1/firmliOfferLetterApp.js";
 import {initDatabase, closeDatabase} from "../src/v1/utils/database.util.js";
+import queueHelper from "../src/v1/helpers/queue.helper.js";
+import realtimeHelper from "../src/v1/helpers/realtime.helper.js";
 
 if (config.db.enabled) {
   await initDatabase();
+  // AI assessments (this process works queued jobs unless QUEUE_WORKER=false), automatic letters / emails
+  const {default: automationService} = await import("../src/v1/services/automation.service.js");
+  await automationService.startBackground();
 }
 
 const server = firmliOfferLetterApp.listen(config.port, () => {
@@ -19,7 +24,10 @@ const shutdown = (signal, exitCode = 0) => {
   isShuttingDown = true;
   logger.info({signal}, "Shutting down...");
 
+  // Open live-update streams would keep close() waiting; the browsers reconnect to another server
+  realtimeHelper.close();
   server.close(async () => {
+    await queueHelper.close();
     await closeDatabase();
     process.exit(exitCode);
   });

@@ -5,10 +5,16 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "node --import ./test/setup.js --test --test-reporter=spec \"test/**/*.test.js\"",
     "staging": "dotenvx run --env-file=.env.development.local -- nodemon ./bin/www",
     "production": "dotenvx run --env-file=.env -- node ./bin/www",
-    "production_start": "node ./bin/www"
+    "production_start": "node ./bin/www",
+    "worker": "dotenvx run --env-file=.env.development.local -- node ./bin/worker.js",
+    "production_worker": "node ./bin/worker.js",
+    "create-tenant": "dotenvx run -q --env-file=.env.development.local -- node ./scripts/create-tenant.js",
+    "platform-tenant": "dotenvx run -q --env-file=.env.development.local -- node ./scripts/platform-tenant.js",
+    "seed:locations": "dotenvx run -q --env-file=.env.development.local -- node ./scripts/seed-locations.js",
+    "test": "node --import ./test/setup.js --test --test-reporter=spec \"test/**/*.test.js\"",
+    "test:db": "dotenvx run -q --env-file=.env.development.local -- node ./test/db/run.js"
   },
   "keywords": [
     "Firmli",
@@ -18,20 +24,38 @@
   ],
   "author": "Team Firmli",
   "private": true,
+  "engines": {
+    "node": ">=24"
+  },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1148.0",
+    "@aws-sdk/s3-request-presigner": "^3.1148.0",
     "@dotenvx/dotenvx": "^1.60.2",
+    "bcryptjs": "^3.0.3",
+    "bullmq": "6.3.12",
     "cors": "^2.8.5",
     "express": "^4.22.1",
+    "express-rate-limit": "^8.7.1",
     "helmet": "^8.3.0",
+    "html-to-pdfmake": "2.5.35",
+    "ioredis": "5.11.1",
     "joi": "^17.12.2",
+    "jsdom": "30.1.2",
+    "jsonwebtoken": "^9.0.3",
+    "lodash": "^4.18.1",
+    "mammoth": "^1.13.0",
+    "multer": "^2.5.0",
     "mysql2": "^3.9.2",
+    "nodemailer": "10.1.7",
+    "pdfmake": "0.3.11",
     "pino": "^10.4.0",
     "pino-http": "^11.0.0",
     "sequelize": "^6.37.8"
   },
   "devDependencies": {
+    "country-state-city": "^3.2.1",
     "nodemon": "^3.1.14",
     "pino-pretty": "^13.2.0",
-    "supertest": "^7.3.1"
+    "supertest": "7.3.1"
   }
 }

@@ -1,4 +1,5 @@
-FROM node:20-alpine
+# Node 24 LTS (security updates until April 2028); Node 20 reached end of life in April 2026
+FROM node:24-alpine
 
 # Set the working directory inside the container
 WORKDIR /app
@@ -21,7 +22,7 @@ RUN chown -R nodejs:nodejs /app
 USER nodejs
 
 # Expose the port the app runs on
-EXPOSE 3000
+EXPOSE 5000
 
 # Define the command to run the application
 CMD ["npm", "run", "production_start"]

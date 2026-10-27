@@ -2,6 +2,7 @@ import fs from "node:fs/promises";
 import Sequelize from "sequelize";
 import config from "../configs/env.config.js";
 import logger from "./logger.util.js";
+import auditHelper from "../helpers/audit.helper.js";
 
 const MODELS_FOLDER = new URL("../models/client/", import.meta.url);
 
@@ -17,6 +18,11 @@ export const initDatabase = async () => {
     port: config.db.port,
     dialect: config.db.dialect,
     logging: false,
+    // Per process (FIRMLI_DB_POOL_MAX, default 10): the dashboard alone runs about 10 queries at once.
+    // Every API server and worker has its own pool, so all of them together must stay under max_connections
+    pool: {max: config.db.poolMax, min: 0, idle: 10_000, acquire: 30_000},
+    // DECIMAL columns and SUM / AVG come back as numbers (null stays null), not as "0.85"
+    dialectOptions: {decimalNumbers: true},
   });
   await sequelize.authenticate();
 
@@ -29,6 +35,7 @@ export const initDatabase = async () => {
   }
   models.forEach((model) => (databaseModel[model.name] = model));
   models.forEach((model) => model.associate?.(databaseModel));
+  auditHelper.attach();
 
   databaseModel.sequelize = sequelize;
   logger.info({models: models.length}, "Database connected.");

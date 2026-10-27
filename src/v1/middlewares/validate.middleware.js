@@ -1,3 +1,4 @@
+import _ from "lodash";
 import {HTTP_RESPONSES} from "../constants/http-response-messages.constants.js";
 import responseHelper from "../helpers/response.helper.js";
 
@@ -13,10 +14,10 @@ const validate = (schema, source = "body") => (req, res, next) => {
     const {error, value} = schema.validate(req[source], {abortEarly: false});
 
     if (error) {
-        const errors = {};
-        error.details.forEach((detail) => {
-            errors[detail.path.join(".")] = detail.message.replace(/"/g, "");
-        });
+        // An error about the whole object (e.g. an empty body) has no field path, so it goes under `source`
+        const errors = _.fromPairs(
+            error.details.map((detail) => [detail.path.join(".") || source, detail.message.replace(/"/g, "")])
+        );
         return responseHelper.errorResponse(res, HTTP_RESPONSES.HTTP_UNPROCESSABLE_ENTITY, errors);
     }
 
